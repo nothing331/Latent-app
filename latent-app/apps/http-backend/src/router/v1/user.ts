@@ -1,23 +1,30 @@
 import { Router } from "express";
-import { generateToken } from "authenticator";
+import { generateToken, verifyToken } from "authenticator";
 import { TOTP } from "totp-generator";
 
 const router = Router();
 
 router.post("/signup", (req, res) => {
   const body = req.body.number;
-  // const { otp } = TOTP.generate(body, {
-  //   digits: 6,
-  //   algorithm: "SHA-512",
-  //   period: 60,
-  //   timestamp: 90,
-  // });
-  // res.json({
-  //   otp,
-  // });
+
   const totp = generateToken(body + "Signup");
+  // Send the otp to the mobile no. via sms
   res.json({
-    totp,
+    id: "1",
+    otp:totp
+  });
+});
+
+router.post("/signup/verify", (req, res) => {
+  const body = req.body.number;
+  if (!verifyToken(body + "Signup", req.body.otp)) {
+    res.json({
+      message: "Invalid Token",
+    });
+    return;
+  }
+  res.json({
+    message: "token is valid",
   });
 });
 
